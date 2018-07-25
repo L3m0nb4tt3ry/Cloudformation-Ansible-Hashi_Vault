@@ -1,0 +1,14 @@
+- name: launch ansible cloudformation example
+  cloudformation: >
+    stack_name="ansible-cloudformation" state=present
+    region=ap-southeast-1 disable_rollback=true
+    template=roles/cisaudit/files/cis_benchmark_template.json
+    aws_access_key={{my_a_key}}
+    aws_secret_key={{my_s_key}}
+    security_token={{my_s_token}}
+  args:
+    template_parameters:
+        S3BucketName: cis-audit-myaccount-dso
+  register: stack
+- name: show stack outputs
+  debug: msg="My stack outputs are {{ stack.stack_outputs }}"

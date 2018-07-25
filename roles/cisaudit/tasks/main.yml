@@ -1,0 +1,4 @@
+---
+
+- name: include another play
+  include_tasks: cisaudit.yml
