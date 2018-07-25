@@ -1,5 +1,5 @@
 ---
 # vars file for role_name
-access_key: "{{awskeys_my.access_key}}"
-secret_key: "{{awskeys_my.secret_key}}"
-security_token: "{{awskeys_my.security_token}}"
+access_key: "{{awskeys.access_key}}"
+secret_key: "{{awskeys.secret_key}}"
+security_token: "{{awskeys.security_token}}"
