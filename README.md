@@ -7,10 +7,9 @@ Set up
 Pre-requisites
 
 
-Ansible
-([link](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html/))
-Hashi_vault
-([link](https://www.vaultproject.io/downloads.html/))
+[Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html/)
+
+[HashiVault](https://www.vaultproject.io/downloads.html/)
 
 Set up Hashi_vault:
 ```
@@ -27,7 +26,7 @@ $ vault write aws/config/root     access_key=AABCDXXXXX     secret_key=abcdxxxxx
 ```
 Clone the repo
 ```
-$ git clone Cloudformation-Ansible_Hashi_Vault
+$ git clone https://github.com/L3m0nb4tt3ry/Cloudformation-Ansible-Hashi_Vault.git
 $ cd Cloudformation-Ansible_Hashi_Vault
 $ ansible-playbook -K cisaudit.yml --extra-vars "vault_token=ROOT_TOKEN"
 ```
