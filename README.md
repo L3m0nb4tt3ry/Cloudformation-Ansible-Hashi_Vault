@@ -33,7 +33,7 @@ Clone the repo
 ```
 $ git clone https://github.com/L3m0nb4tt3ry/Cloudformation-Ansible-Hashi_Vault.git
 $ cd Cloudformation-Ansible_Hashi_Vault
-$ ansible-playbook -K cisaudit.yml --extra-vars "vault_token=ROOT_TOKEN"
+$ ansible-playbook -i inventory -K cisaudit.yml --extra-vars "vault_token=ROOT_TOKEN"
 ```
 Ansible will create a cloudformation stack with cis_audit lambda function.
 
