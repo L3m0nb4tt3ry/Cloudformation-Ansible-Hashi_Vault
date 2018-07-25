@@ -22,6 +22,11 @@ $ export VAULT_ADDR=http://127.0.0.1:8200
 Check is vault is properly working 
 ```
 $ vault status
+```
+Configure vault to store aws credentials
+```
+$ vault secrets enable -path=aws aws
+
 $ vault write aws/config/root     access_key=AABCDXXXXX     secret_key=abcdxxxxxx
 ```
 Clone the repo
