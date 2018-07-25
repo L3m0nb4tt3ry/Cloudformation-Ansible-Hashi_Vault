@@ -3,9 +3,9 @@
     stack_name="ansible-cloudformation" state=present
     region=ap-southeast-1 disable_rollback=true
     template=roles/cisaudit/files/cis_benchmark_template.json
-    aws_access_key={{my_a_key}}
-    aws_secret_key={{my_s_key}}
-    security_token={{my_s_token}}
+    aws_access_key={{access_key}}
+    aws_secret_key={{secret_key}}
+    security_token={{security_token}}
   args:
     template_parameters:
         S3BucketName: cis-audit-myaccount-dso
