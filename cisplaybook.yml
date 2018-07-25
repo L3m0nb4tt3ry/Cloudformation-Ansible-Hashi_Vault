@@ -3,7 +3,7 @@
   hosts: test
   connection: local
   vars:
-      my_vault_token: "{{vault_token}}"
-      awskeys_my: "{{ lookup('hashi_vault', 'secret=aws/sts/deploy token={{ vault_token }} url=http://127.0.0.1:8200')}}"
+      hashi_vault_token: "{{vault_token}}"
+      awskeys: "{{ lookup('hashi_vault', 'secret=aws/sts/deploy token={{ vault_token }} url=http://127.0.0.1:8200')}}"
   roles:
     - cisaudit
