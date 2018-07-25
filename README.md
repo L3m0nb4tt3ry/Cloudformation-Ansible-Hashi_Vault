@@ -28,6 +28,8 @@ Configure vault to store aws credentials
 $ vault secrets enable -path=aws aws
 
 $ vault write aws/config/root     access_key=AABCDXXXXX     secret_key=abcdxxxxxx
+vault write aws/roles/deploy \
+    arn=arn:aws:iam::ACCOUNT-ID-WITHOUT-HYPHENS:role/RoleNameToAssume
 ```
 Clone the repo
 ```
