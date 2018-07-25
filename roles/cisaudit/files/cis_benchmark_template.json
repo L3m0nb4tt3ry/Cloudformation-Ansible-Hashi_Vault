@@ -1,0 +1,287 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {
+        "AWS::CloudFormation::Designer": {
+            "937b8dea-341b-47d5-9b93-4943127fe667": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 219,
+                    "y": 82
+                },
+                "z": 0
+            }
+        }
+    },
+
+  "Parameters" : {
+    "S3BucketName" : {
+      "Description" : "Target S3 Bucket Name:",
+      "Type" : "String"
+    }
+  },
+
+	"Resources": {
+
+
+	"CISCheckerLambdaFunction": {
+		"Type" : "AWS::Lambda::Function",
+		"Properties" : {
+						"Description" : "CISCheckerLambdaFunction",
+						"FunctionName" : "CISCheckerLambdaFunction",
+						"Handler" : "aws-cis-foundation-benchmark-checklist.lambda_handler",
+						"MemorySize" : 128,
+						"Role" : {"Fn::GetAtt" : ["CISCheckerLambdaRole", "Arn"]},
+						"Runtime" : "python2.7",
+						"Timeout" : 300,
+						"Code" : {
+								"S3Bucket": "ciszipfileholder",
+								"S3Key": "aws-cis-foundation-benchmark-checklist.zip"
+
+						}
+
+
+						}
+        },
+  "CISCheckerLambdaRule": {
+    "Type": "AWS::Events::Rule",
+    "Properties": {
+            "Description": "CISCheckerLambdaRule",
+            "ScheduleExpression": "cron(0 8 1 * ? *)",
+            "State": "ENABLED",
+            "Targets": [{
+            "Arn": { "Fn::GetAtt": ["CISCheckerLambdaFunction", "Arn"] },
+            "Id": "CISCheckerLambdaFunction"
+            }]
+      }
+  },
+  "PermissionForEventsToInvokeLambda": {
+    "Type": "AWS::Lambda::Permission",
+    "Properties": {
+            "FunctionName": { "Ref": "CISCheckerLambdaFunction" },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "events.amazonaws.com",
+            "SourceArn": { "Fn::GetAtt": ["CISCheckerLambdaRule", "Arn"] }
+    }
+  },
+
+
+	"CISResultBucket": {
+			"Type": "AWS::S3::Bucket",
+			"Properties": {
+				"BucketName": {"Ref" : "S3BucketName"}
+			}
+		},
+
+
+
+	"CISCheckerLambdaRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": "CISCheckerLambdaRole",
+				"Path": "/service-role/",
+				"ManagedPolicyArns": ["arn:aws:iam::aws:policy/AWSLambdaExecute"],
+				"AssumeRolePolicyDocument": {
+				"Version": "2012-10-17",
+					"Statement": [{
+							"Action": "sts:AssumeRole",
+							"Effect": "Allow",
+							"Principal": {
+								"Service": "lambda.amazonaws.com"
+										 }
+								}]
+											}
+							}
+							},
+
+
+	"CISCheckerLambdaRolePolicy1": {
+			"Type": "AWS::IAM::Policy",
+				"Properties": {
+					"PolicyName": "CISCheckerLambdaRolePolicy1",
+					"Roles": ["CISCheckerLambdaRole"],
+					"PolicyDocument": {
+						"Version": "2012-10-17",
+							"Statement": [
+								{
+									"Effect": "Allow",
+									"Action": [
+											"logs:*"
+												],
+									"Resource": "arn:aws:logs:*:*:*"
+								},
+								{
+									"Effect": "Allow",
+							"Action": [
+									"s3:GetObject",
+									"s3:PutObject",
+									"s3:List*"
+										],
+							"Resource": "arn:aws:s3:::*"
+        }
+    ]
+}
+},
+"DependsOn": "CISCheckerLambdaRole"
+},
+
+
+	"CISCheckerLambdaRolePolicy2": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "CISCheckerLambdaRolePolicy2",
+				"Roles": ["CISCheckerLambdaRole"],
+				"PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:GetObject",
+                                "s3:PutObject",
+                                "s3:DeleteObject",
+                                "s3:List*"
+                            ],
+                            "Resource": {"Fn::Join" : [ "", [ "arn:aws:s3:::", { "Ref" : "S3BucketName"}, "/*" ] ] }
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:GetBucketAcl",
+                                "s3:GetBucketLogging",
+                                "s3:List*"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Resource": "*",
+                            "Effect": "Allow"
+                        },
+                        {
+                            "Action": [
+                                "sns:publish"
+                            ],
+                            "Resource": "*",
+                            "Effect": "Allow"
+                        },
+                        {
+                            "Action": [
+                                "cloudtrail:DescribeTrails",
+                                "cloudtrail:GetTrailStatus"
+                            ],
+                            "Resource": [
+                                "*"
+                            ],
+                            "Effect": "Allow"
+                        },
+                        {
+                            "Action": [
+                                "cloudwatch:DescribeAlarmsForMetric"
+                            ],
+                            "Resource": [
+                                "*"
+                            ],
+                            "Effect": "Allow"
+                        },
+                        {
+                            "Action": [
+                                "config:DescribeConfigurationRecorderStatus",
+                                "config:DescribeConfigurationRecorders",
+                                "config:DescribeDeliveryChannelStatus",
+                                "config:PutEvaluations"
+                            ],
+                            "Resource": [
+                                "*"
+                            ],
+                            "Effect": "Allow"
+                        },
+                        {
+                            "Action": [
+                                "iam:GenerateCredentialReport",
+                                "iam:GetAccountPasswordPolicy",
+                                "iam:GetAccountSummary",
+                                "iam:GetCredentialReport",
+                                "iam:GetPolicyVersion",
+                                "iam:ListAccessKeys",
+                                "iam:ListEntitiesForPolicy",
+                                "iam:ListPolicies",
+                                "iam:ListUserPolicies",
+                                "iam:ListUsers",
+                                "iam:ListVirtualMFADevices"
+                            ],
+                            "Resource": [
+                                "*"
+                            ],
+                            "Effect": "Allow"
+                        },
+                        {
+                            "Action": [
+                                "ec2:DescribeFlowLogs",
+                                "ec2:DescribeInstances",
+                                "ec2:DescribeRegions",
+                                "ec2:DescribeRouteTables",
+                                "ec2:DescribeSecurityGroups",
+                                "ec2:DescribeVpcs"
+                            ],
+                            "Resource": [
+                                "*"
+                            ],
+                            "Effect": "Allow"
+                        },
+                        {
+                            "Action": [
+                                "kms:DescribeKey",
+                                "kms:GetKeyRotationStatus",
+                                "kms:ListKeys"
+                            ],
+                            "Resource": [
+                                "*"
+                            ],
+                            "Effect": "Allow"
+                        },
+                        {
+                            "Action": [
+                                "logs:DescribeMetricFilters"
+                            ],
+                            "Resource": [
+                                "*"
+                            ],
+                            "Effect": "Allow"
+                        },
+                        {
+                            "Action": [
+                                "sns:ListSubscriptionsByTopic"
+                            ],
+                            "Resource": [
+                                "*"
+                            ],
+                            "Effect": "Allow"
+                        }
+                    ]
+                }
+
+
+            },
+			"DependsOn": "CISCheckerLambdaRole"
+        }
+
+
+
+
+	},
+  "Outputs" : {
+      "CISCheckerLambdaFunction" : {
+      "Description"  : "ARN of REPAYMENT table",
+      "Value"   :  {"Fn::GetAtt": ["CISCheckerLambdaFunction","Arn"]}
+}
+
+}
+
+}
