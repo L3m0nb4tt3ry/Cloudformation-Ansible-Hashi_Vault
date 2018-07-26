@@ -6,9 +6,9 @@ Warning: This set up is for demo purpose do not use this setup in production.
 Pre-requisites
 ---
 
-[Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html/)
+[Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 
-[HashiVault](https://www.vaultproject.io/downloads.html/)
+[HashiVault](https://www.vaultproject.io/downloads.html)
 
 Set up Hashi_vault:
 ```
@@ -42,3 +42,52 @@ Future Scope:
 - Execute lambda function from same ansible playbook
 - Run CIS_FIX script from playbook
 
+Extras:
+Please check Hashi Vaults docucmentation regarding IAM policies and assume roles. [Link](https://www.vaultproject.io/docs/secrets/aws/index.html)
+
+The aws/config/root credentials need permission to manage dynamic IAM users. Here is an example AWS IAM policy that grants the most commonly required permissions Vault needs:
+ ```
+ {
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iam:AttachUserPolicy",
+        "iam:CreateAccessKey",
+        "iam:CreateUser",
+        "iam:DeleteAccessKey",
+        "iam:DeleteUser",
+        "iam:DeleteUserPolicy",
+        "iam:DetachUserPolicy",
+        "iam:ListAccessKeys",
+        "iam:ListAttachedUserPolicies",
+        "iam:ListGroupsForUser",
+        "iam:ListUserPolicies",
+        "iam:PutUserPolicy",
+        "iam:RemoveUserFromGroup"
+      ],
+      "Resource": [
+        "arn:aws:iam::ACCOUNT-ID-WITHOUT-HYPHENS:user/vault-*"
+      ]
+    }
+  ]
+}
+```
+The aws/config/root credentials require IAM permissions for sts:GetFederationToken and the permissions to delegate to the STS federation token. For example, this policy on the aws/config/root credentials would allow creation of an STS federated token with delegated ec2:* permissions:
+```
+$ cat policy.json
+{
+  "Version": "2012-10-17",
+  "Statement": {
+    "Effect": "Allow",
+    "Action": [
+      "ec2:*",
+      "sts:GetFederationToken"
+    ],
+    "Resource": "*"
+  }
+}
+$ vault write aws/roles/deploy \
+    policy=@policy.json
+```
