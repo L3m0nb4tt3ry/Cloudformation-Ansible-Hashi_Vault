@@ -2,10 +2,9 @@
 Create cloudformation template using ansible and Hashi vault roles
 
 Warning: This set up is for demo purpose do not use this setup in production.
-Set up
-
+---
 Pre-requisites
-
+---
 
 [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html/)
 
